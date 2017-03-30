@@ -15,13 +15,13 @@ def view_command():
 
 def search_command():
 	listbox.delete(0,END)
-	for row in backend.search(title.get(),author.get(),year.get(),country.get()):
+	for row in backend.search(title.get(),author.get(),year.get(),country.get(), borrowed.get()):
 		listbox.insert(END, row)
 
 def add_command():
-	backend.insert(title.get(),author.get(),year.get(),country.get())
+	backend.insert(title.get(),author.get(),year.get(),country.get(), borrowed.get())
 	listbox.delete(0,END)
-	listbox.insert(END, (title.get() ,author.get() ,year.get() , country.get()))
+	listbox.insert(END, (title.get() ,author.get() ,year.get() , country.get(), borrowed.get()))
 
 def get_selected_row(event):
 	index=listbox.curselection()[0] #return index of the row in form of a tuple (index,) hence the [0]
@@ -36,6 +36,8 @@ def get_selected_row(event):
 	e_year.insert(END, selected_tuple[3])
 	e_country.delete(0,END)
 	e_country.insert(END, selected_tuple[4])
+	e_borrowed.delete(0,END)
+	e_borrowed.insert(END, selected_tuple[5])
 
 def delete_command():
 	backend.delete(selected_tuple[0])
@@ -44,9 +46,10 @@ def delete_command():
 	e_author.delete(0,END)
 	e_year.delete(0,END)
 	e_country.delete(0,END)
+	e_borrowed.delete(0,END)
 
 def update_command():
-	backend.update(selected_tuple[0],title.get(),author.get(),year.get(),country.get())
+	backend.update(selected_tuple[0],title.get(),author.get(),year.get(),country.get(),borrowed.get())
 	view_command()
 
 
@@ -84,9 +87,17 @@ country=StringVar()
 e_country=Entry(window, textvariable=country)
 e_country.grid(row=1,column=3)
 
+#borrowes
+label_borrowed=Label(window, text="Borrowed")
+label_borrowed.grid(row=2, column=0)
+
+borrowed=StringVar()
+e_borrowed=Entry(window, textvariable=borrowed)
+e_borrowed.grid(row=2,column=1)
+
 #list box and attached scroll bar
 listbox=Listbox(window, height=10, width=40)
-listbox.grid(row=2, column=0, rowspan=6, columnspan=3)
+listbox.grid(row=3, column=0, rowspan=6, columnspan=3)
 	#get_selected_row function is triggered when user select an item in the listbox
 listbox.bind("<<ListboxSelect>>", get_selected_row)
 
@@ -99,22 +110,21 @@ listbox.bind("<<ListboxSelect>>", get_selected_row)
 #actions
 
 b_view=Button(window, text="View all", width=12, command=view_command)
-b_view.grid(row=2, column=3)
+b_view.grid(row=3, column=3)
 
 b_search=Button(window, text="Search", width=12, command=search_command)
-b_search.grid(row=3, column=3)
-
-b_update=Button(window, text="Update", width=12)
-b_update.grid(row=5, column=3)
+b_search.grid(row=4, column=3)
 
 b_add=Button(window, text="Add", width=12, command=add_command)
-b_add.grid(row=4, column=3)
+b_add.grid(row=5, column=3)
+
+b_update=Button(window, text="Update", width=12, command=update_command)
+b_update.grid(row=6, column=3)
 
 b_delete=Button(window, text="Delete", width=12, command=delete_command)
-b_delete.grid(row=5, column=3)
+b_delete.grid(row=7, column=3)
 
-b_delete=Button(window, text="Update", width=12, command=update_command)
-b_delete.grid(row=6, column=3)
+
 
 #b_close=Button(window, text="Close", width=12, command=window.destroy)
 #b_close.grid(row=7, column=3)

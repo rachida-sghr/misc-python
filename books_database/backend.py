@@ -3,14 +3,14 @@ import sqlite3
 def connect():
 	con=sqlite3.connect("books.db")
 	cur=con.cursor()
-	cur.execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT)")
+	cur.execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT, borrowed TEXT)")
 	con.commit()
 	con.close()
 
-def insert(title, author, year, country):
+def insert(title, author, year, country, borrowed):
 	con=sqlite3.connect("books.db")
 	cur=con.cursor()
-	cur.execute("INSERT INTO books VALUES(NULL,?,?,?,?)",(title, author, year, country))
+	cur.execute("INSERT INTO books VALUES(NULL,?,?,?,?,?)",(title, author, year, country, borrowed))
 	con.commit()
 	con.close()
 
@@ -22,10 +22,10 @@ def view():
 	con.close()
 	return rows
 
-def search(title="", author="", year="", country=""):
+def search(title="", author="", year="", country="", borrowed=""):
 	con=sqlite3.connect("books.db")
 	cur=con.cursor()
-	cur.execute("SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=?",(title, author, year, country))
+	cur.execute("SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=? OR borrowed=?",(title, author, year, country, borrowed))
 	rows=cur.fetchall()
 	con.close()
 	return rows
@@ -37,16 +37,16 @@ def delete(id):
 	con.commit()
 	con.close()
 
-def update(id, title, author, year, country):
+def update(id, title, author, year, country, borrowed):
 	con=sqlite3.connect("books.db")
 	cur=con.cursor()
-	cur.execute("UPDATE books SET  title=?, author=?, year=?, country=? WHERE id=?",(title, author, year, country,id))
+	cur.execute("UPDATE books SET  title=?, author=?, year=?, country=?, borrowed=? WHERE id=?",(title, author, year, country, borrowed, id))
 	con.commit()
 	con.close()
 
 
 
-#connect()
+connect()
 #insert("john","khkhk","1988", "usa")
 print(view())
 #print(search(title="john"))
