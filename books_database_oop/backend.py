@@ -5,30 +5,33 @@ class Database:
 
     def __init__(self, database):
         self.connection = sqlite3.connect("books.db")
-        self.connection.cursor().execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT, borrowed TEXT)")
-        self.connection.commit()
+        self.execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT, borrowed TEXT)")
 
     def insert(self, title, author, year, country, borrowed):
-        self.connection.cursor().execute("INSERT INTO books VALUES(NULL,?,?,?,?,?)",(title, author, year, country, borrowed))
-        self.connection.commit()
+        cmd = "INSERT INTO books VALUES(NULL,?,?,?,?,?)"
+        self.execute(cmd, title, author, year, country, borrowed)
 
     def view(self):
-        self.connection.cursor().execute("SELECT * FROM books")
-        rows=self.connection.cursor().fetchall()
-        return rows
+        return self.fetch("SELECT * FROM books")
 
     def search(self, title="", author="", year="", country="", borrowed=""):
-        self.connection.cursor().execute("SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=? OR borrowed=?",(title, author, year, country, borrowed))
-        rows=self.connection.cursor().fetchall()
-        return rows
+        cmd = "SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=? OR borrowed=?"
+        return self.fetch(cmd, title, author, year, country, borrowed)
 
     def delete(self, id):
-        self.connection.cursor().execute("DELETE FROM books WHERE id=?",(id,))
-        self.connection.commit()
+        self.execute("DELETE FROM books WHERE id=?", id)
 
     def update(self, id, title, author, year, country, borrowed):
-        self.connection.cursor().execute("UPDATE books SET  title=?, author=?, year=?, country=?, borrowed=? WHERE id=?",(title, author, year, country, borrowed, id))
+        cmd = "UPDATE books SET title=?, author=?, year=?, country=?, borrowed=? WHERE id=?"
+        self.execute(cmd, title, author, year, country, borrowed, id)
+
+    def execute(self, sql_cmd, *params):
+        self.connection.cursor().execute(sql_cmd, params)
         self.connection.commit()
+
+    def fetch(self, sql_cmd, *params):
+        self.connection.cursor().execute(sql_cmd, params)
+        return self.connection.cursor().fetchall()
 
     def __del__(self):
         self.connection.close()
