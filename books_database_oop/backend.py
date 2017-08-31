@@ -4,35 +4,35 @@ import sqlite3
 class Database:
 
     def __init__(self, database):
-        self.con=sqlite3.connect("books.db")
-        self.cur=self.con.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT, borrowed TEXT)")
-        self.con.commit()
+        self.connection = sqlite3.connect("books.db")
+        self.cursor = self.connection.cursor()
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS books (id INTEGER PRiMARY KEY , title TEXT, author TEXT, year INTEGER, country TEXT, borrowed TEXT)")
+        self.connection.commit()
 
     def insert(self, title, author, year, country, borrowed):
-        self.cur.execute("INSERT INTO books VALUES(NULL,?,?,?,?,?)",(title, author, year, country, borrowed))
-        self.con.commit()
+        self.cursor.execute("INSERT INTO books VALUES(NULL,?,?,?,?,?)",(title, author, year, country, borrowed))
+        self.connection.commit()
 
     def view(self):
-        self.cur.execute("SELECT * FROM books")
-        rows=self.cur.fetchall()
+        self.cursor.execute("SELECT * FROM books")
+        rows=self.cursor.fetchall()
         return rows
 
     def search(self, title="", author="", year="", country="", borrowed=""):
-        self.cur.execute("SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=? OR borrowed=?",(title, author, year, country, borrowed))
-        rows=self.cur.fetchall()
+        self.cursor.execute("SELECT * FROM books WHERE title=? OR author=? OR year=? OR country=? OR borrowed=?",(title, author, year, country, borrowed))
+        rows=self.cursor.fetchall()
         return rows
 
     def delete(self, id):
-        self.cur.execute("DELETE FROM books WHERE id=?",(id,))
-        self.con.commit()
+        self.cursor.execute("DELETE FROM books WHERE id=?",(id,))
+        self.connection.commit()
 
     def update(self, id, title, author, year, country, borrowed):
-        self.cur.execute("UPDATE books SET  title=?, author=?, year=?, country=?, borrowed=? WHERE id=?",(title, author, year, country, borrowed, id))
-        self.con.commit()
+        self.cursor.execute("UPDATE books SET  title=?, author=?, year=?, country=?, borrowed=? WHERE id=?",(title, author, year, country, borrowed, id))
+        self.connection.commit()
 
     def __del__(self):
-        self.con.close()
+        self.connection.close()
 
 
 
