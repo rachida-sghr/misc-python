@@ -1,5 +1,5 @@
 from tkinter import \
-    ANCHOR, END, Label, StringVar, Entry, Button, Listbox, Tk
+    ACTIVE, ANCHOR, END, Label, StringVar, Entry, Button, Listbox, Tk
 
 from backend import Database
 
@@ -98,20 +98,24 @@ class Window:
         self.listbox.insert(END, (self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get()))
 
     def get_selected_row(self, event):
-        # return index of the row in form of a tuple (index,) hence the [0]
-        index = self.listbox.curselection()[0]
-        self.selected_tuple = listbox.get(index)
-        # fill entries with selected row
+        entry = self.listbox.get(ACTIVE)
+        self.populate_entries(*entry)
+
+    def populate_entries(self, title, author, year, country, borrowed):
         self.e_title.delete(0, END)
-        self.e_title.insert(END, self.selected_tuple[1])
+        self.e_title.insert(END, title)
+
         self.e_author.delete(0, END)
-        self.e_author.insert(END, self.selected_tuple[2])
+        self.e_author.insert(END, author)
+
         self.e_year.delete(0, END)
-        self.e_year.insert(END, self.selected_tuple[3])
+        self.e_year.insert(END, year)
+
         self.e_country.delete(0, END)
-        self.e_country.insert(END, self.selected_tuple[4])
+        self.e_country.insert(END, country)
+
         self.e_borrowed.delete(0, END)
-        self.e_borrowed.insert(END, self.selected_tuple[5])
+        self.e_borrowed.insert(END, borrowed)
 
     def delete_command(self):
         database.delete(selected_tuple[0])
@@ -124,7 +128,7 @@ class Window:
 
     def update_command(self):
         database.update(self.selected_tuple[0], self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get())
-        view_command()
+        self.view_command()
 
 
 window = Tk()
