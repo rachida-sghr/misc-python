@@ -35,13 +35,3 @@ class Database:
 
     def __del__(self):
         self.connection.close()
-
-
-
-#connect()
-#insert("john","khkhk","1988", "usa")
-#print(view())
-#print(search(title="john"))
-#delete(3)
-#update(id=2, title="cocomte3i")
-#print(view())
