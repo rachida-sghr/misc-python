@@ -1,14 +1,15 @@
-from tkinter import *
+from tkinter import \
+    ANCHOR, END, Label, StringVar, Entry, Button, Listbox, Tk
+
 from backend import Database
 
 database = Database("books.db")
 
+
 class Window:
 
     def __init__(self, window):
-
         self.window=window
-
         self.window.wm_title("My Books")
 
         # title
