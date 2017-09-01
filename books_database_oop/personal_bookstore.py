@@ -1,127 +1,144 @@
-from tkinter import *
+from tkinter import \
+    ACTIVE, ANCHOR, END, Label, StringVar, Entry, Button, Listbox, Tk
+
 from backend import Database
 
 database = Database("books.db")
 
+
+class BookEntry:
+
+    def __init__(self, label, window, position):
+        self.window = window
+        self.row, self.column = position
+
+        self.set_label(label)
+        self.set_entry()
+
+    def set_entry(self):
+        self.value = StringVar()
+        self.entry = Entry(window, textvariable=self.value)
+        self.entry.grid(row=self.row, column=self.column + 1)
+
+    def set_label(self, name):
+        self.label = Label(self.window, text=name)
+        self.label.grid(row=self.row, column=self.column)
+
+    def set(self, value):
+        self.value.set(value)
+
+    def clear(self):
+        self.set('')
+
+    def get(self):
+        return self.value.get()
+
+
 class Window:
 
-	def __init__(self, window):
+    def __init__(self, window):
+        self.window = window
+        self.window.wm_title("My Books")
 
-		self.window=window
+        self.title = BookEntry("Title", window, (0, 0))
+        self.author = BookEntry("Author", window, (0, 2))
+        self.year = BookEntry("Year", window, (1, 0))
+        self.country = BookEntry("Country", window, (1, 2))
+        self.borrowed = BookEntry("Borrowed", window, (2, 0))
 
-		self.window.wm_title("My Books")
+        self.make_button("View all", 12, self.view, (3, 3))
+        self.make_button("Search", 12, self.search, (4, 3))
+        self.make_button("Add", 12, self.add, (5, 3))
+        self.make_button("Update", 12, self.add, (6, 3))
+        self.make_button("Delete", 12, self.delete, (7, 3))
 
-		# title
-		label_title=Label(window, text="Title")
-		label_title.grid(row=0, column=0)
+        self.books = Listbox(window, height=10, width=40)
+        self.books.grid(row=3, column=0, rowspan=6, columnspan=3)
+        # select_row is called when user select an item in the listbox
+        self.books.bind("<<ListboxSelect>>", self.select_row)
 
-		self.title=StringVar()
-		self.e_title=Entry(window, textvariable=self.title)
-		self.e_title.grid(row=0,column=1)
+    def make_button(self, text, width, callback, position):
+        b = Button(self.window, text=text, width=width, command=callback)
+        b.grid(row=position[0], column=position[1])
 
-		# author
-		label_author=Label(window, text="Author")
-		label_author.grid(row=0, column=2)
+    # Callbacks:
+    def delete(self):
+        """
+        Delete the book corresponding to the active row
+        """
+        book_id = self.books.get(self.books.curselection())[0]
+        database.delete(book_id)
+        self.view()
 
-		self.author=StringVar()
-		self.e_author=Entry(window, textvariable=self.author)
-		self.e_author.grid(row=0,column=3)
+    def update(self):
+        """
+        Update the book corresponding to the active row with the current data
+        """
+        row = self.books.get(ACTIVE)
+        database.update(*row)
+        self.view_command()
 
-		# year
-		label_year=Label(window, text="Year")
-		label_year.grid(row=1, column=0)
+    def view(self):
+        """
+        Retrieve the whole list of books, and display it.
+        """
+        books = database.view()
+        self.show_books(books)
 
-		self.year=StringVar()
-		self.e_year=Entry(window, textvariable=self.year)
-		self.e_year.grid(row=1,column=1)
+    def search(self):
+        """
+        Retrieve the list of books that match the current input, and display
+        it.
+        """
+        books = database.search(*self.get_input())
+        self.show_books(books)
 
-		# country
-		label_country=Label(window, text="Country")
-		label_country.grid(row=1, column=2)
+    def add(self):
+        """
+        Create a new book entry in the database from the current input and
+        refresh the list of books.
+        """
+        entries = self.get_input()
+        database.insert(*entries)
+        self.view()
 
-		self.country=StringVar()
-		self.e_country=Entry(window, textvariable=self.country)
-		self.e_country.grid(row=1,column=3)
+    def show_books(self, books):
+        """
+        Populate the book list with the given books
+        """
+        self.books.delete(0, END)
+        for book in books:
+            self.books.insert(END, book)
 
-		# borrowed
-		label_borrowed=Label(window, text="Borrowed")
-		label_borrowed.grid(row=2, column=0)
+    def select_row(self, event):
+        """
+        Populate the input fields with the row currently selected
+        """
+        row = self.books.get(self.books.curselection())
+        print(row)
+        self.set_input(*list(row)[1:])
 
-		self.borrowed=StringVar()
-		self.e_borrowed=Entry(window, textvariable=self.borrowed)
-		self.e_borrowed.grid(row=2,column=1)
+    def get_input(self):
+        return (
+            self.title.get(),
+            self.author.get(),
+            self.year.get(),
+            self.country.get(),
+            self.borrowed.get())
 
-		# list box and attached scroll bar
-		self.listbox=Listbox(window, height=10, width=40)
-		self.listbox.grid(row=3, column=0, rowspan=6, columnspan=3)
-		# get_selected_row function is triggered when user select an item in the listbox
-		self.listbox.bind("<<ListboxSelect>>", self.get_selected_row)
+    def set_input(self, title, author, year, country, borrowed):
+        self.title.set(title)
+        self.author.set(author)
+        self.year.set(year)
+        self.country.set(country)
+        self.borrowed.set(borrowed)
 
-		# scrollbar=Scrollbar(window)
-		# scrollbar.grid(row=2,column=2,rowspan=6)
-
-		# listbox.configure(yscrollcommand=scrollbar.set)
-		# scrollbar.configure(command=listbox.yview)
-
-		# buttons
-
-		b_view=Button(window, text="View all", width=12, command=self.view_command)
-		b_view.grid(row=3, column=3)
-
-		b_search=Button(window, text="Search", width=12, command=self.search_command)
-		b_search.grid(row=4, column=3)
-
-		b_add=Button(window, text="Add", width=12, command=self.add_command)
-		b_add.grid(row=5, column=3)
-
-		b_update=Button(window, text="Update", width=12, command=self.update_command)
-		b_update.grid(row=6, column=3)
-
-		b_delete=Button(window, text="Delete", width=12, command=self.delete_command)
-		b_delete.grid(row=7, column=3)
-
-	def view_command(self):
-		self.listbox.delete(0,END)
-		for row in database.view():
-			self.listbox.insert(END, row)
-
-	def search_command(self):
-		self.listbox.delete(0,END)
-		for row in database.search(self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get()):
-			self.listbox.insert(END, row)
-
-	def add_command(self):
-		database.insert(self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get())
-		self.listbox.delete(0,END)
-		self.listbox.insert(END, (self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get()))
-
-	def get_selected_row(self, event):
-		index=self.listbox.curselection()[0] #return index of the row in form of a tuple (index,) hence the [0]
-		self.selected_tuple=listbox.get(index)
-		#fill entries with selected row
-		self.e_title.delete(0, END)
-		self.e_title.insert(END, self.selected_tuple[1])
-		self.e_author.delete(0, END)
-		self.e_author.insert(END, self.selected_tuple[2])
-		self.e_year.delete(0,END)
-		self.e_year.insert(END, self.selected_tuple[3])
-		self.e_country.delete(0, END)
-		self.e_country.insert(END, self.selected_tuple[4])
-		self.e_borrowed.delete(0, END)
-		self.e_borrowed.insert(END, self.selected_tuple[5])
-
-	def delete_command(self):
-		database.delete(selected_tuple[0])
-		self.listbox.delete(ANCHOR)
-		self.e_title.delete(0,END)
-		self.e_author.delete(0,END)
-		self.e_year.delete(0,END)
-		self.e_country.delete(0,END)
-		self.e_borrowed.delete(0,END)
-
-	def update_command(self):
-		database.update(self.selected_tuple[0], self.title.get(), self.author.get(), self.year.get(), self.country.get(), self.borrowed.get())
-		view_command()
+    def clear_input(self):
+        self.title.clear()
+        self.author.clear()
+        self.year.clear()
+        self.country.clear()
+        self.borrowed.clear()
 
 
 window = Tk()
