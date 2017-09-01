@@ -30,8 +30,8 @@ class Database:
         self.connection.commit()
 
     def fetch(self, sql_cmd, *params):
-        self.connection.cursor().execute(sql_cmd, params)
-        return self.connection.cursor().fetchall()
+        cursor = self.connection.cursor().execute(sql_cmd, params)
+        return cursor.fetchall()
 
     def __del__(self):
         self.connection.close()
